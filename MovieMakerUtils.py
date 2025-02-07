@@ -5,9 +5,7 @@ from pathlib import Path
 
 import librosa
 import moviepy
-from moviepy.editor import *
-from moviepy.editor import CompositeVideoClip
-from moviepy.editor import CompositeAudioClip
+from moviepy import *
 import soundfile as sf
 
 # from moviepy.video.compositing import *
@@ -132,7 +130,7 @@ class MovieMakerUtils:
             return targetDivOriginWidth
             pass
 
-        result = clip.set_position(lambda t: posf(t)).resize(lambda t: (sizef(t)))
+        result = clip.with_position(lambda t: posf(t)).resized(lambda t: (sizef(t)))
         return result
         pass
 
@@ -178,7 +176,7 @@ class MovieMakerUtils:
             return (neww, newh)
             pass
 
-        result = clip.set_position(lambda t: posFunc(t)).resize(lambda t: (sizeFunc(t)))
+        result = clip.with_position(lambda t: posFunc(t)).resized(lambda t: (sizeFunc(t)))
         return result
         pass
 
@@ -190,8 +188,8 @@ class MovieMakerUtils:
         video1 = VideoFileClip(vpath).subclip(0, 10)
 
         video2 = VideoFileClip(vpath2).subclip(0, 10)
-        resized = video2.resize(0.3).set_position((50, 50)).set_start(2)
-        moving = resized.set_position(lambda t: (50 + 10 * t, 50 + 10 * t)).resize(lambda t: 1 + 0.1 * t)
+        resized = video2.resized(0.3).with_position((50, 50)).with_start(2)
+        moving = resized.with_position(lambda t: (50 + 10 * t, 50 + 10 * t)).resized(lambda t: 1 + 0.1 * t)
         # txtClip = TextClip('Cool effect', color='white', font="Amiri-Bold",
         #                    kerning=5, fontsize=100)
         # video1.fx(vfx.mirror_y)
@@ -205,7 +203,7 @@ class MovieMakerUtils:
     @staticmethod
     def setBGM(video:VideoClip, audio:AudioClip, vol=0.8):
         audio1 = video.audio
-        looped = afx.audio_loop(audio.volumex(vol), duration=video.duration)
+        looped = audio.with_volume_scaled(vol).with_effects([afx.AudioLoop(duration=video.duration)])
 
         print(f"audio1:{audio1}")
         print(f"audio2:{looped}")
@@ -214,7 +212,7 @@ class MovieMakerUtils:
             mixed = looped
         else:
             mixed = CompositeAudioClip([audio1, looped])
-        return video.set_audio(mixed)
+        return video.with_audio(mixed)
         pass
 
     def extendRotateDurationAudio(clip: AudioClip, durationSec, muteExtended = False):
@@ -264,7 +262,7 @@ class MovieMakerUtils:
         pass
     # @staticmethod
     # def captionTextToVideoClip(clip:VideoClip, captionText: str):
-    #     enlarged = clip.resize((1920, 1080))
+    #     enlarged = clip.resized((1920, 1080))
     #     pieces = TTSAgent.splitText(captionText)
     #     offsetduration = 0
     #     textsubtitlecliplist = []
@@ -281,14 +279,14 @@ class MovieMakerUtils:
     #         titleClip: TextClip = TextClip(question, font=Config.Config.Config.subtitlefont, color='white',
     #                                        align='center', stroke_color='black', fontsize=fontsize, bg_color='black', size=(1920, 290 - 54))
     #         if titleClip.size[0] > 1920 * 0.9:
-    #             titleClip = titleClip.resize(1920 * 0.9 / titleClip.size[0]).set_position((96, 54 + 790))
+    #             titleClip = titleClip.resized(1920 * 0.9 / titleClip.size[0]).with_position((96, 54 + 790))
     #
-    #         titleClip = titleClip.set_duration(duration).set_start(offsetduration)
+    #         titleClip = titleClip.with_duration(duration).with_start(offsetduration)
     #
     #         offsetduration += duration
     #         textsubtitlecliplist.append(titleClip)
     #     textsubtitlecliplist.insert(0,enlarged)
-    #     composited = CompositeVideoClip(textsubtitlecliplist).resize(clip.size)
+    #     composited = CompositeVideoClip(textsubtitlecliplist).resized(clip.size)
     #     return composited
 
     @staticmethod
@@ -302,10 +300,10 @@ class MovieMakerUtils:
     def imageToVideo(imgPath, duration, to, resize=(920, 1480)):
         clip = ImageClip(imgPath, duration=duration)
         if resize is not None:
-            clip = clip.resize(resize)
+            clip = clip.resized(resize)
 
         bg = ColorClip((resize[0] - 200, resize[1]-200), color=(255,255,255))
-        bg = bg.set_duration(duration)
+        bg = bg.with_duration(duration)
 
         piecelength = 8
         pieces = []
@@ -319,11 +317,11 @@ class MovieMakerUtils:
         randPick = MovieMakerUtils.randomPick(2)
 
         if randPick == 0:
-            clip = clip.set_position((-200, 0))
+            clip = clip.with_position((-200, 0))
             clip = MovieMakerUtils.animationsTo(clip, [(0, 0)], [resize], [pieces[0]])
         if randPick == 1:
             enlarged = (resize[0] * 1.2, resize[1] * 1.2)
-            clip = clip.resize(enlarged).set_position((-100 * 1.2, 0))
+            clip = clip.resized(enlarged).with_position((-100 * 1.2, 0))
             clip = MovieMakerUtils.animationsTo(clip, [(-100, 0)], [resize], [pieces[0]])
         sequence = [bg, clip]
         composited = CompositeVideoClip(sequence)
@@ -373,7 +371,7 @@ class MovieMakerUtils:
         # toPath = 'D:/BaiduNetdiskDownload/clip3.mp4'
         # video1 = VideoFileClip(vpath).subclip(0, 13)
         # video2 = VideoFileClip(vpath2).subclip(0, 10)
-        # resized = video2.resize(0.5).set_position((50, 50)).set_start(2)
+        # resized = video2.resized(0.5).with_position((50, 50)).with_start(2)
         # fullscreensize = video1.size
         # animation = MovieMakerUtils.animationsTo(resized, [(100, 50), (400, 100)], [(100, 100), (200, 200)], [1, 2])
         # # enlarged = enlargeFullScreen(resized, fullscreensize, 1)
@@ -388,7 +386,7 @@ class MovieMakerUtils:
 if __name__ == '__main__':
     # concatevideo()
     # text = TextClip("克拉戴假发恋爱记", font="C:\\Users\\Administrator\\AppData\\Local\\Microsoft\\Windows\\Fonts\\hanyialitifan.ttf",bg_color='black', color='white', align='center', stroke_color='black', fontsize=80, size=(1920, 1080))
-    # text = text.set_fps(5).set_duration(5)
+    # text = text.with_fps(5).with_duration(5)
     # text.write_videofile('r:/fonttest.mp4')
     # print(TextClip.list('font'))
     MovieMakerUtils.test()

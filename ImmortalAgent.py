@@ -2,7 +2,8 @@
 #
 # sys.path.append('/Entity/')
 # sys.path.append('/Moviemaker/')
-from moviepy.editor import *
+import os
+from moviepy import *
 # from Entity import ImmortalEntity
 from .MovieMakerUtils import MovieMakerUtils
 from . import Utils
