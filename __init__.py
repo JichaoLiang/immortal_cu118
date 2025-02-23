@@ -161,6 +161,8 @@ class ConcatNodeQueue:
         if pointer is None or len(pointer) == 0:
             if autoRoot == "YES":
                 entity["Properties"]["root"] = newNode["ID"]
+        elif pointer == "ROOT":
+                entity["Properties"]["root"] = newNode["ID"]
         else:
             ImmortalEntity.setPrevNode(newNode, pointer)
             if extraNodes is not None and len(extraNodes) > 0:
